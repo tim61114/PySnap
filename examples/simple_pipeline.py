@@ -57,19 +57,25 @@ class TextLengthSnap(Snap):
         }
 
 def main():
-    # Create pipeline
+    # Create a new pipeline instance
     pipeline = Pipeline()
     
-    # Create Snaps
+    # Create instances of Snaps
     uppercase_snap = TextUppercaseSnap()
     length_snap = TextLengthSnap()
     
-    # Add Snaps to pipeline
+    # Add snaps to the pipeline
     pipeline.add_snap(uppercase_snap)
     pipeline.add_snap(length_snap)
     
-    # Execute pipeline
+    # Connect snaps in the pipeline
+    # Connect the output of uppercase_snap to the input of length_snap
+    pipeline.connect(uppercase_snap, "uppercase_text", length_snap, "uppercase_text")
+    
+    # Execute the pipeline with initial input
     result = pipeline.execute({"text": "hello world"})
+    
+    # Print the final result of the pipeline execution
     print(result)
 
 if __name__ == "__main__":

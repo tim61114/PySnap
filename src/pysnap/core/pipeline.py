@@ -1,5 +1,6 @@
 from typing import List, Dict, Any, Tuple
 from .snap import Snap
+from collections import defaultdict, deque
 
 class Pipeline:
     """
@@ -41,7 +42,7 @@ class Pipeline:
     
     def execute(self, initial_inputs: Dict[str, Any] = None) -> Dict[str, Any]:
         """
-        Execute the pipeline by processing data through connected Snaps.
+        Execute the pipeline by processing data through connected Snaps in a DAG order.
         
         Args:
             initial_inputs: Optional initial input data for the first Snap
@@ -51,12 +52,38 @@ class Pipeline:
         """
         current_data = initial_inputs or {}
         
-        for snap in self.snaps:
-            # Validate inputs before processing
+        # Build the graph and in-degree count
+        graph = defaultdict(list)
+        in_degree = {snap: 0 for snap in self.snaps}
+        
+        for source_snap, source_output, destination_snap, destination_input in self.connections:
+            graph[source_snap].append((destination_snap, source_output, destination_input))
+            in_degree[destination_snap] += 1
+        
+        # Perform topological sort
+        queue = deque([snap for snap in self.snaps if in_degree[snap] == 0])
+        sorted_snaps = []
+        
+        while queue:
+            snap = queue.popleft()
+            sorted_snaps.append(snap)
+            
+            for destination_snap, source_output, destination_input in graph[snap]:
+                in_degree[destination_snap] -= 1
+                if in_degree[destination_snap] == 0:
+                    queue.append(destination_snap)
+        
+        # Execute snaps in topologically sorted order
+        for snap in sorted_snaps:
             if not snap.validate_inputs(current_data):
                 raise ValueError(f"Invalid inputs for Snap: {snap}")
             
-            # Process the Snap
-            current_data = snap.process(current_data)
+            output_data = snap.process(current_data)
+            
+            for destination_snap, source_output, destination_input in graph[snap]:
+                if source_output in output_data:
+                    current_data[destination_input] = output_data[source_output]
+                else:
+                    raise ValueError(f"Output {source_output} not found in Snap: {snap}")
         
         return current_data
