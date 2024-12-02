@@ -19,7 +19,7 @@ class InputView:
     
     def validate(self, value: Any) -> bool:
         """
-        Basic validation method that can be extended in future.
+        Basic validation method that can be extended in the future.
         
         Args:
             value: The value to validate against the input view's specifications
