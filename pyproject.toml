@@ -5,9 +5,15 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "PySnap"
 version = "0.1.0"
+authors = [
+    {name = "Tim Fan", email = "tfan@snaplogic.com"}
+]
 description = "A simplified Snap API implementation in Python"
 readme = "README.md"
 requires-python = ">=3.8"
+dependencies = [
+    "openai"
+]
 
 [project.optional-dependencies]
 dev = ["pytest", "mypy"]

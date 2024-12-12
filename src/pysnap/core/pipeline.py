@@ -2,6 +2,9 @@ from typing import List, Dict, Any, Tuple
 from .snap import Snap
 from collections import defaultdict, deque
 
+from .snapexecutionwrapper import SnapExecutionWrapper
+
+
 class Pipeline:
     """
     Manages the execution of a sequence of Snaps.
@@ -13,6 +16,7 @@ class Pipeline:
     def __init__(self):
         self.snaps: List[Snap] = []
         self.connections: List[Tuple[Snap, str, Snap, str]] = []
+        self.snap_execution_instance: Dict[Snap, SnapExecutionWrapper] = {}
     
     def add_snap(self, snap: Snap):
         """
@@ -22,6 +26,7 @@ class Pipeline:
             snap: Snap to be added to the pipeline
         """
         self.snaps.append(snap)
+        self.snap_execution_instance[snap] = SnapExecutionWrapper(snap)
     
     def connect(self, 
                 source_snap: Snap, 
@@ -40,7 +45,7 @@ class Pipeline:
         # Future: Add more sophisticated connection validation
         self.connections.append((source_snap, source_output, destination_snap, destination_input))
     
-    def execute(self, initial_inputs: Dict[str, Any] = None) -> Dict[str, Any]:
+    def execute(self, initial_inputs: Dict[str, Any] = None) -> bool:
         """
         Execute the pipeline by processing data through connected Snaps in a DAG order.
         
@@ -48,10 +53,8 @@ class Pipeline:
             initial_inputs: Optional initial input data for the first Snap
         
         Returns:
-            Final output of the pipeline
+            True if the pipeline executed successfully
         """
-        current_data = initial_inputs or {}
-        
         # Build the graph and in-degree count
         graph = defaultdict(list)
         in_degree = {snap: 0 for snap in self.snaps}
@@ -59,37 +62,43 @@ class Pipeline:
         for source_snap, source_output, destination_snap, destination_input in self.connections:
             graph[source_snap].append((destination_snap, source_output, destination_input))
             in_degree[destination_snap] += 1
-        
-        # Perform topological sort
-        queue = deque([snap for snap in self.snaps if in_degree[snap] == 0])
-        sorted_snaps = []
-        
-        while queue:
-            snap = queue.popleft()
-            sorted_snaps.append(snap)
 
-            if not graph.__contains__(snap) :
-                continue
 
-            for destination_snap, source_output, destination_input in graph[snap]:
-                in_degree[destination_snap] -= 1
-                if in_degree[destination_snap] == 0:
-                    queue.append(destination_snap)
-        
-        # Execute snaps in topologically sorted order
-        output_data = {}
-        for snap in sorted_snaps:
-            if not snap.validate_inputs(current_data):
-                raise ValueError(f"Invalid inputs for Snap: {snap}")
-            
-            output_data = snap.process(current_data)
-            
-            for destination_snap, source_output, destination_input in graph[snap]:
-                if source_output in output_data:
-                    current_data.clear()
-                    current_data[destination_input] = output_data[source_output]
-                # Temporarily disabled
-                # else:
-                #     raise ValueError(f"Output {source_output} not found in Snap: {snap}")
+        # Find all snaps with 0 in-degree and 1 input view
+        starting_snaps = [snap for snap in self.snaps if in_degree[snap] == 0 and len(snap.input_views) == 1]
+        ready_snaps = [snap for snap in self.snaps if in_degree[snap] == 0]
 
-        return output_data
+        if len(starting_snaps) > 1:
+            raise ValueError("Invalid pipeline configuration: Multiple open input views detected")
+
+        if len(starting_snaps) == 1:
+            target_snap = starting_snaps[0]
+            self.snap_execution_instance[target_snap].add_input(target_snap.input_views[0].name, initial_inputs[starting_snaps[0].input_views[0].name])
+
+        # Prepare snaps with 0 in-degree for execution
+        for snap in ready_snaps:
+            self.snap_execution_instance[snap].is_ready_for_execution()
+
+        job_queue = [snap for snap in ready_snaps]
+
+        while job_queue:
+            cur_snap_instance = self.snap_execution_instance[job_queue.pop(0)]
+            output = cur_snap_instance.execute()
+            for destination_snap, source_output, destination_input in graph[cur_snap_instance.snap]:
+                if source_output not in output.keys():
+                    continue
+                self.snap_execution_instance[destination_snap].add_input(destination_input, output[source_output])
+                if self.snap_execution_instance[destination_snap].is_ready_for_execution():
+                    job_queue.append(destination_snap)
+
+
+        return True
+
+    def get_output(self):
+        #find all snaps with out-degree 0
+        output_snaps = [snap for snap in self.snaps if not any([snap == connection[0] for connection in self.connections])]
+        for snap in output_snaps:
+            print(self.snap_execution_instance[snap].outputs if self.snap_execution_instance[snap].outputs else "no output from this snap")
+
+
+

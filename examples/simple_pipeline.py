@@ -23,8 +23,8 @@ def main():
     pipeline.connect(length_snap, "text_length", length_snap2, "text")
     
     # Execute the pipeline with initial input
-    result = pipeline.execute({"text": "hello world"})
-    
+    pipeline.execute({"text": "hello world"})
+    result = pipeline.get_output()
     # Print the final result of the pipeline execution
     print(result)
 

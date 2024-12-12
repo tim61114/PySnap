@@ -2,13 +2,14 @@ from abc import ABC, abstractmethod
 from typing import Dict, Any, List
 from .views import InputView, OutputView
 
+
 class Snap(ABC):
     """
     Abstract base class defining the contract for Snap modules.
     
     Defines the interface for processing data through input and output views.
     """
-    
+
     @property
     @abstractmethod
     def input_views(self) -> List[InputView]:
@@ -19,7 +20,7 @@ class Snap(ABC):
             List of InputView objects defining the input contract
         """
         pass
-    
+
     @property
     @abstractmethod
     def output_views(self) -> List[OutputView]:
@@ -30,7 +31,7 @@ class Snap(ABC):
             List of OutputView objects defining the output contract
         """
         pass
-    
+
     @abstractmethod
     def process(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -43,7 +44,7 @@ class Snap(ABC):
             Dictionary of output data keyed by output view names
         """
         pass
-    
+
     def validate_inputs(self, inputs: Dict[str, Any]) -> bool:
         """
         Validate inputs against the defined input views.
@@ -58,9 +59,9 @@ class Snap(ABC):
         for input_view in self.input_views:
             if input_view.required and input_view.name not in inputs:
                 return False
-            
+
             if input_view.name in inputs:
                 if not input_view.validate(inputs[input_view.name]):
                     return False
-        
+
         return True
