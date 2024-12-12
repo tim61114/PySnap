@@ -15,18 +15,23 @@ This project is an oversimplified version of the Java Snap API.
 ```
 PySnap/
 │
-├── src/                    # Source code
+├── src/                                # Source code
 │   └── py_snap/
-│       ├── core/           # Core framework components
-│       │   ├── views.py    # InputView and OutputView definitions
-│       │   ├── snap.py     # Abstract Snap base class
-│       │   └── pipeline.py # Pipeline implementation
-│       │
+│       └── core/                       # Core framework components
+│           ├── views.py                # InputView and OutputView definitions
+│           ├── snap.py                 # Abstract Snap base class
+│           ├── pipeline.py             # Pipeline implementation
+│           └── snapexecutionwrapper.py # Execution wrapper for holding input and output documents
+│        
 │       
 │
-├── examples/               # Example usage scripts
-├── pyproject.toml          # Project configuration
-└── README.md               # Project documentation
+├── examples/                           # Examples including pipelines and snaps
+│   ├── snaps/                          # Sample snaps to play with
+│   ├── simple_pipeline_example.py    
+│   ├── router_pipeline_example.py
+│   └── chat_completions_pipeline_example.py
+├── pyproject.toml                      # Project configuration
+└── README.md              
 ```
 
 ## Prerequisites
@@ -58,9 +63,6 @@ pyenv activate pysnap-env
 ```bash
 # Install in editable mode
 pip install -e .
-
-# Optional: Install development dependencies
-pip install -e .[dev]
 ```
 
 ## Basic Usage
@@ -91,15 +93,16 @@ pipeline = Pipeline()
 pipeline.add_snap(TextUppercaseSnap())
 
 # Execute pipeline
-result = pipeline.execute({"text": "hello world"})
-print(result)  # Outputs: {'uppercase_text': 'HELLO WORLD'}
+pipeline.execute({"text": "hello world"})
+pipeline.get_output()
+
 ```
 
 ## Development
 ### Running Examples
 ```bash
 # From project root
-python examples/simple_pipeline.py
+python examples/simple_pipeline_example.py
 ```
 
 ### Running Tests

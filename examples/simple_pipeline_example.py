@@ -24,9 +24,8 @@ def main():
     
     # Execute the pipeline with initial input
     pipeline.execute({"text": "hello world"})
-    result = pipeline.get_output()
-    # Print the final result of the pipeline execution
-    print(result)
+    pipeline.get_output()
+
 
 if __name__ == "__main__":
     main()

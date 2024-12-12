@@ -91,7 +91,6 @@ class Pipeline:
                 if self.snap_execution_instance[destination_snap].is_ready_for_execution():
                     job_queue.append(destination_snap)
 
-
         return True
 
     def get_output(self):

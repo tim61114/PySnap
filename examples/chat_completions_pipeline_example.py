@@ -7,8 +7,7 @@ def main():
     openai_cc_snap = OpenAIChatCompletions()
     pipeline.add_snap(openai_cc_snap)
     pipeline.execute({"prompt": "What is the meaning of life?"})
-    result = pipeline.get_output()
-    print(result)
+    pipeline.get_output()
 
 
 if __name__ == "__main__":
