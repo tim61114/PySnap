@@ -2,14 +2,14 @@ from pysnap.core.snap import Snap
 from pysnap.core.views import InputView, OutputView
 
 
-class RouterSnap(Snap):
+class CopySnap(Snap):
     @property
     def input_views(self):
         return [
             InputView(
                 name="input",
                 required=True,
-                type_hint=str,
+                type_hint=None,
                 description="Input text"
             )
         ]
@@ -20,20 +20,19 @@ class RouterSnap(Snap):
         return [
             OutputView(
                 name="output1",
-                type_hint=str,
-                description="Text longer than 10 characters"
+                type_hint=None,
+                description="Output copy1"
             ),
             OutputView(
                 name="output2",
-                type_hint=str,
-                description="Text shorter than 10 characters"
+                type_hint=None,
+                description="Output copy2"
             )
         ]
 
     def process(self, inputs):
+        output = {}
+        for ov in self.output_views:
+            output[ov.name] = inputs["input"]
 
-        # Send to output based on input conditions, conditions can be whatever
-        if len(inputs["input"]) > 10:
-            return {"output1": inputs["input"]}
-        else:
-            return {"output2": inputs["input"]}
+        return output

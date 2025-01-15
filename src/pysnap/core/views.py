@@ -62,7 +62,9 @@ class OutputView:
             Boolean indicating whether the value meets the output view's requirements
         """
         # If type_hint is specified, check type compatibility
-        if self.type_hint is not None and not isinstance(value, self.type_hint):
-            return False
+        if (self.type_hint is not None or self.type_hint is not Any) and not isinstance(value, self.type_hint):
+            raise ValueError(
+                f"Mismatching output type"
+            )
         
         return True

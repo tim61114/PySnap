@@ -58,7 +58,12 @@ class Pipeline:
         # Build the graph and in-degree count
         graph = defaultdict(list)
         in_degree = {snap: 0 for snap in self.snaps}
-        
+
+        if len(self.connections) >= len(self.snaps):
+            raise ValueError(
+                f"Invalid pipeline configuration: number of connections is greater than number of snaps"
+            )
+
         for source_snap, source_output, destination_snap, destination_input in self.connections:
             graph[source_snap].append((destination_snap, source_output, destination_input))
             in_degree[destination_snap] += 1
