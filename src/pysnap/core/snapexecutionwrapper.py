@@ -144,6 +144,8 @@ class SnapExecutionWrapper:
         try:
             # Execute the Snap's process method
             self.outputs = self.snap.process(self.inputs)
+            if self.snap.is_passthrough():
+                self.outputs["original"] = self.inputs
 
             # Update state and execution metadata
             self.state = SnapExecutionState.EXECUTED

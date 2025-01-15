@@ -8,8 +8,8 @@ from openai import OpenAI
 class OpenAIChatCompletions(Snap):
     DEFAULT_MODEL = "gpt-4o-mini"
     DEFAULT_PROMPT = ""
-    def __init__(self, model: Optional[str] = DEFAULT_MODEL, prompt: Optional[str] = DEFAULT_PROMPT):
-        super().__init__()
+    def __init__(self, model: Optional[str] = DEFAULT_MODEL, prompt: Optional[str] = DEFAULT_PROMPT, passthrough: Optional[bool] = False):
+        super().__init__(passthrough)
         self.model = model
         self.prompt = prompt
         

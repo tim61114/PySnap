@@ -27,7 +27,7 @@ def main():
             },
         }
     ]
-    openai_tc_snap = OpenAIToolCalling(tools)
+    openai_tc_snap = OpenAIToolCalling(tools, passthrough=True)
     pipeline.add_snap(any_generator_snap)
     pipeline.add_snap(openai_tc_snap)
     pipeline.connect(any_generator_snap, "output", openai_tc_snap, "input")

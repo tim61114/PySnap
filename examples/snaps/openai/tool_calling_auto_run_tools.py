@@ -1,4 +1,5 @@
-from typing import Optional, List, Dict
+import json
+from typing import Optional, List, Dict, Tuple
 
 from openai import OpenAI
 
@@ -6,14 +7,16 @@ from pysnap.core.snap import Snap
 from pysnap.core.views import InputView, OutputView
 
 
-class OpenAIToolCalling(Snap):
+class OpenAIToolCallingAuto(Snap):
     DEFAULT_MODEL = "gpt-4o-mini"
     DEFAULT_MESSAGES_FIELD = "messages"
     tools: List[Dict]
+    tooldefs = Dict[str, Tuple]
     messages_field: str
-    def __init__(self, tools: Optional[List[Dict]], model: Optional[str] = DEFAULT_MODEL, messages_field: Optional[str] = DEFAULT_MESSAGES_FIELD, passthrough: Optional[bool] = False):
+    def __init__(self, tooldefs: Dict[str, Tuple], model: Optional[str] = DEFAULT_MODEL, messages_field: Optional[str] = DEFAULT_MESSAGES_FIELD, passthrough: Optional[bool] = False):
         super().__init__(passthrough)
-        self.tools = tools
+        self.tools = [tool for (tool, _) in tooldefs.values()]
+        self.tooldefs = tooldefs
         self.model = model
         self.messages_field = messages_field
     @property
@@ -66,4 +69,24 @@ class OpenAIToolCalling(Snap):
             tools=self.tools
         )
 
-        return {"response": chat_completion.choices[0].message.tool_calls}
+        while chat_completion.choices[0].finish_reason != "stop":
+            if chat_completion.choices[0].finish_reason == "tool_calls":
+                tool_call = chat_completion.choices[0].message.tool_calls[0]
+                args = json.loads(tool_call.function.arguments)
+
+                result = self.tooldefs[tool_call.function.name][1](**args)
+                messages.append(chat_completion.choices[0].message)
+                messages.append({
+                    "role": "tool",
+                    "tool_call_id": tool_call.id,
+                    "content": result
+                })
+
+                chat_completion = client.chat.completions.create(
+                    model=self.model,
+                    messages=messages,
+                    tools=self.tools
+                )
+
+        return {"response": chat_completion.choices[0].message.content}
+    

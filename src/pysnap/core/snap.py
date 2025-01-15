@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from .views import InputView, OutputView
 
 
@@ -9,6 +9,9 @@ class Snap(ABC):
     
     Defines the interface for processing data through input and output views.
     """
+    passthrough: bool
+    def __init__(self, passthrough: Optional[bool] = False):
+        self.passthrough = passthrough
 
     @property
     @abstractmethod
@@ -65,3 +68,6 @@ class Snap(ABC):
                     return False
 
         return True
+
+    def is_passthrough(self):
+        return self.passthrough
