@@ -1,5 +1,5 @@
-from examples.snaps.text_length_snap import TextLengthSnap
-from examples.snaps.text_uppercase_snap import TextUppercaseSnap
+from snaps.text_length_snap import TextLengthSnap
+from snaps.text_uppercase_snap import TextUppercaseSnap
 from pysnap.core.pipeline import Pipeline
 
 

@@ -1,9 +1,9 @@
 import copy
 
-from examples.snaps.router_snap import RouterSnap
-from examples.snaps.text_generator_snap import TextGeneratorSnap
-from examples.snaps.text_length_snap import TextLengthSnap
-from examples.snaps.text_uppercase_snap import TextUppercaseSnap
+from snaps.router_snap import RouterSnap
+from snaps.text_generator_snap import TextGeneratorSnap
+from snaps.text_length_snap import TextLengthSnap
+from snaps.text_uppercase_snap import TextUppercaseSnap
 from pysnap.core.pipeline import Pipeline
 
 # Example usage

@@ -1,5 +1,5 @@
-from examples.snaps.any_generator_snap import AnyGeneratorSnap
-from examples.snaps.openai.tool_calling import OpenAIToolCalling
+from snaps.any_generator_snap import AnyGeneratorSnap
+from snaps.openai.tool_calling import OpenAIToolCalling
 from pysnap.core.pipeline import Pipeline
 
 
